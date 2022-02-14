@@ -10,6 +10,17 @@
         <button class="button m-1" v-on:click="share">Share</button>
       </div>
     </div>
+    <footer class="footer">
+      <div class="content has-text-centered">
+        <p>
+          Try coming up with a story with these five emojis!
+        </p>
+        <p>Don't like them? Generate a new set.
+        </p>
+        <p>Want to see what your friends will think up? Use the share option to copy your list.
+        </p>
+      </div>
+    </footer>
   </div>
 </template>
 
