@@ -71,4 +71,14 @@ export default {
   grid-gap: 10px;
   margin: 10px;
 }
+@media ( max-width: 550px) {
+  .grid-row {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .grid-row > div {
+    flex-basis: 25%;
+    flex-grow: 0;
+  }
+}
 </style>

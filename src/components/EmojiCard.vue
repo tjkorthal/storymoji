@@ -1,5 +1,5 @@
 <template>
-  <div class="tile is-justify-content-center">
+  <div class="tile is-child is-justify-content-center">
     <div class="box has-text-centered emoji is-size-1-mobile">
       {{ icon }}
     </div>
