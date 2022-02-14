@@ -19,7 +19,6 @@ export default {
     aspect-ratio: 1 / 1;
     width: 100%;
     display: inline-flex;
-    line-height: 6em;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
