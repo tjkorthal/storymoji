@@ -3,7 +3,18 @@
     <h1 class="title has-text-centered">storymoji 📖</h1>
     <div class="content">
       <div class="tile is-flex grid-row">
-        <emoji-card v-for="emoji in items" :key="emoji" v-bind:icon="emoji"/>
+        <emoji-card v-for="emoji in items" :key="emoji" v-bind:icon="emoji" />
+      </div>
+      <div class="tile is-flex grid-row">
+        <textarea
+          id="story-box"
+          class="textarea is-primary"
+          placeholder="Once upon a time..."
+          v-on:keyup="updateCharCount"
+        ></textarea>
+        <div id="char-count" class="tile is-child has-text-centered">
+          {{ charCount }}/{{ charLimit }}
+        </div>
       </div>
       <div class="tile is-flex is-justify-content-center">
         <button class="button m-1" v-on:click="generate">Generate</button>
@@ -12,37 +23,29 @@
     </div>
     <footer class="footer">
       <div class="content has-text-centered">
-        <p>
-          Try coming up with a story with these five emojis!
-        </p>
-        <p>Don't like them? Generate a new set.
-        </p>
-        <p>Want to see what your friends will think up? Use the share option to copy your list.
-        </p>
+        <p>Try coming up with a story with these five emojis!</p>
+        <p>Don't like them? Generate a new set.</p>
+        <p>Use the share option to copy the emoji list and your story.</p>
       </div>
     </footer>
   </div>
 </template>
 
 <script>
-import randomoji from './emoji.js'
-import EmojiCard from './components/EmojiCard.vue'
+import randomoji from "./emoji.js";
+import EmojiCard from "./components/EmojiCard.vue";
 
 export default {
-  name: 'App',
+  name: "App",
   components: {
-    EmojiCard
+    EmojiCard,
   },
   data: function () {
     return {
-      items: [
-        randomoji(),
-        randomoji(),
-        randomoji(),
-        randomoji(),
-        randomoji()
-      ]
-    }
+      items: [randomoji(), randomoji(), randomoji(), randomoji(), randomoji()],
+      charCount: 0,
+      charLimit: 280,
+    };
   },
   methods: {
     generate: function () {
@@ -51,20 +54,33 @@ export default {
         randomoji(),
         randomoji(),
         randomoji(),
-        randomoji()
-      ]
+        randomoji(),
+      ];
     },
     share: function () {
-      navigator.clipboard.writeText(this.items.join(''))
+      let prompt = this.items.join("");
+      let story = document.getElementById("story-box").value;
+      navigator.clipboard.writeText(`${prompt}\n${story}`);
       this.$buefy.notification.open({
-        message: 'Copied to clipboard',
-        type: 'is-success',
-        'auto-close': true,
-        position: 'is-top'
-      })
-    }
-  }
-}
+        message: "Copied to clipboard",
+        type: "is-success",
+        "auto-close": true,
+        position: "is-top",
+      });
+    },
+    updateCharCount: function () {
+      let box = document.getElementById("story-box");
+      let counter = document.getElementById("char-count");
+      let charCount = box.value.split("").length;
+      if (charCount > this.charLimit) {
+        counter.classList.add("is-invalid");
+      } else {
+        counter.classList.remove("is-invalid");
+      }
+      this.charCount = charCount;
+    },
+  },
+};
 </script>
 
 <style>
@@ -82,7 +98,13 @@ export default {
   grid-gap: 10px;
   margin: 10px;
 }
-@media ( max-width: 550px) {
+.is-invalid {
+  color: red;
+}
+.textarea {
+  min-width: inherit;
+}
+@media (max-width: 550px) {
   .grid-row {
     flex-wrap: wrap;
     justify-content: center;
