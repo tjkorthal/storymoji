@@ -23,5 +23,6 @@ export default {
     justify-content: center;
     vertical-align: middle;
     border-radius: 25px;
+    user-select: none;
   }
 </style>

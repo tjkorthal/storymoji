@@ -12,7 +12,10 @@
           placeholder="Once upon a time..."
           v-on:keyup="updateCharCount"
         ></textarea>
-        <div id="char-count" class="tile is-child has-text-centered">
+        <div
+          :class="validCount ? '' : 'is-invalid'"
+          class="tile is-child has-text-centered"
+        >
           {{ charCount }}/{{ charLimit }}
         </div>
       </div>
@@ -32,7 +35,7 @@
 </template>
 
 <script>
-import randomoji from "./emoji.js";
+import { randomSet, todaysPrompt } from "./emoji.js";
 import EmojiCard from "./components/EmojiCard.vue";
 
 export default {
@@ -42,20 +45,15 @@ export default {
   },
   data: function () {
     return {
-      items: [randomoji(), randomoji(), randomoji(), randomoji(), randomoji()],
+      items: todaysPrompt(),
       charCount: 0,
       charLimit: 280,
+      validCount: true,
     };
   },
   methods: {
     generate: function () {
-      this.items = [
-        randomoji(),
-        randomoji(),
-        randomoji(),
-        randomoji(),
-        randomoji(),
-      ];
+      this.items = randomSet();
     },
     share: function () {
       let prompt = this.items.join("");
@@ -70,20 +68,26 @@ export default {
     },
     updateCharCount: function () {
       let box = document.getElementById("story-box");
-      let counter = document.getElementById("char-count");
       let charCount = box.value.split("").length;
-      if (charCount > this.charLimit) {
-        counter.classList.add("is-invalid");
-      } else {
-        counter.classList.remove("is-invalid");
-      }
+      this.validCount = charCount <= this.charLimit;
       this.charCount = charCount;
     },
   },
 };
 </script>
 
-<style>
+<style lang="scss">
+// Import Bulma's core
+@import "~bulma/sass/utilities/_all";
+
+// set global colors before importing other styles so they're not overridden
+$primary: $green;
+$link-focus-border: $primary;
+
+// Import Bulma and Buefy styles
+@import "~bulma";
+@import "~buefy/src/scss/buefy";
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
