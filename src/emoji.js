@@ -38,10 +38,13 @@ const promptForDay = function (day) {
 }
 // February 25, 2022 UTC
 const START_DAY = 1645765200000;
+const MILLISECONDS_IN_A_DAY = 86400000;
+
 const todaysPrompt = function () {
   let today = new Date();
   let todayUTC = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  return promptForDay(todayUTC.getTime() - START_DAY);
+  let day = (todayUTC.getTime() - START_DAY) / MILLISECONDS_IN_A_DAY;
+  return promptForDay(day);
 };
 const randomoji = function () {
   let max = MOJIS.length;
