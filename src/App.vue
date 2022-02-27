@@ -21,15 +21,20 @@
       </div>
       <div class="tile is-flex is-justify-content-center">
         <button class="button m-1" v-on:click="generate">Generate</button>
-        <button class="button m-1" v-on:click="share">Share</button>
+        <button class="button m-1" v-on:click="copyToClipboard">Copy</button>
+        <button class="button m-1" v-on:click="saveStory" v-bind:disabled="!validCount">Submit</button>
       </div>
     </div>
     <footer class="footer">
       <div class="content has-text-centered">
         <p>Try coming up with a story with these five emojis!</p>
         <p>Don't like them? Generate a new set.</p>
-        <p>Use the share option to copy the emoji list and your story.</p>
+        <p>
+          Use the copy button to copy the emoji list and your story, or use
+          submit to save your story for others to view.
+        </p>
       </div>
+      <submissions v-bind:prompt="this.items.join('')" />
     </footer>
   </div>
 </template>
@@ -37,28 +42,31 @@
 <script>
 import { randomSet, todaysPrompt } from "./emoji.js";
 import EmojiCard from "./components/EmojiCard.vue";
+import Submissions from "./components/Submissions.vue";
+import axios from "axios";
 
 export default {
   name: "App",
   components: {
     EmojiCard,
+    Submissions,
   },
   data: function () {
     return {
       items: todaysPrompt(),
       charCount: 0,
-      charLimit: 280,
-      validCount: true,
+      charLimit: 200,
+      validCount: false,
     };
   },
   methods: {
     generate: function () {
       this.items = randomSet();
     },
-    share: function () {
+    copyToClipboard: function () {
       let prompt = this.items.join("");
       let story = document.getElementById("story-box").value;
-      navigator.clipboard.writeText(`${prompt}\n${story}`);
+      navigator.clipboard.writeText(`PROMPT: ${prompt}\n${story}`);
       this.$buefy.notification.open({
         message: "Copied to clipboard",
         type: "is-success",
@@ -66,10 +74,39 @@ export default {
         position: "is-top",
       });
     },
+    saveStory: function () {
+      let prompt = this.items.join("");
+      let story = document.getElementById("story-box").value;
+      axios
+        .post("/.netlify/functions/submit_story", {
+          prompt: prompt,
+          story: story,
+        })
+        .then(() => {
+          this.$buefy.notification.open({
+            message: "Story submitted",
+            type: "is-success",
+            position: "is-top",
+          });
+        })
+        .catch((err) => {
+          let response = err.response;
+          let message = "An error occurred";
+          if (response.data) {
+            message = response.data.errorMessage;
+          }
+          this.$buefy.notification.open({
+            message: message,
+            type: "is-danger",
+            duration: 5000,
+            position: "is-top",
+          });
+        });
+    },
     updateCharCount: function () {
       let box = document.getElementById("story-box");
       let charCount = box.value.split("").length;
-      this.validCount = charCount <= this.charLimit;
+      this.validCount = charCount <= this.charLimit && charCount > 0;
       this.charCount = charCount;
     },
   },
