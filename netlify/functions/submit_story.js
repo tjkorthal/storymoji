@@ -1,5 +1,5 @@
-const { Client } = require('pg')
-const client = new Client({
+const { Pool } = require('pg')
+const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
@@ -17,8 +17,7 @@ exports.handler = async function (event, context) {
     }
   }
 
-  await client.connect()
-  await client.query(
+  await pool.query(
     'INSERT INTO storymoji_submissions (prompt, story) VALUES ($1, $2)', [payload['prompt'], payload['story']])
     .then(res => {
       response['statusCode'] = res.rowCount ? 200 : 400
@@ -30,6 +29,5 @@ exports.handler = async function (event, context) {
       }
       response['statusCode'] = 400
     })
-  await client.end()
   return response
 }
