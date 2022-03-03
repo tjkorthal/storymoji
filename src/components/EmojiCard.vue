@@ -9,20 +9,19 @@
 <script>
 export default {
   props: {
-    icon: String
-  }
-}
+    icon: String,
+  },
+};
 </script>
 <style>
-  .emoji {
-    font-size: 6em;
-    aspect-ratio: 1 / 1;
-    width: 100%;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    vertical-align: middle;
-    border-radius: 25px;
-    user-select: none;
-  }
+.emoji {
+  font-size: 6em;
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  vertical-align: middle;
+  border-radius: 25px;
+  user-select: none;
+}
 </style>

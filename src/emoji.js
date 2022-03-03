@@ -42,8 +42,8 @@ const MILLISECONDS_IN_A_DAY = 86400000;
 
 const todaysPrompt = function () {
   let today = new Date();
-  let todayUTC = new Date(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate());
-  let day = (todayUTC.getTime() - START_DAY) / MILLISECONDS_IN_A_DAY;
+  let localDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  let day = (localDate.getTime() - START_DAY) / MILLISECONDS_IN_A_DAY;
   return promptForDay(day);
 };
 const randomoji = function () {

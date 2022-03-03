@@ -5,12 +5,22 @@
       <div class="tile is-flex grid-row">
         <emoji-card v-for="emoji in items" :key="emoji" v-bind:icon="emoji" />
       </div>
+      <div class="box tile grid-row">
+        <div class="content has-text-centered">
+          <p>Try coming up with a story with these five emojis!</p>
+          <p>Don't like them? Generate a new set.</p>
+          <p>
+            Use the copy button to copy the emoji list and your story, or use
+            submit to save your story for others to view.
+          </p>
+        </div>
+      </div>
       <div class="tile is-flex grid-row">
         <textarea
           id="story-box"
           class="textarea is-primary"
           placeholder="Once upon a time..."
-          v-on:keyup="updateCharCount"
+          v-model="story"
         ></textarea>
         <div
           :class="validCount ? '' : 'is-invalid'"
@@ -22,20 +32,19 @@
       <div class="tile is-flex is-justify-content-center">
         <button class="button m-1" v-on:click="generate">Generate</button>
         <button class="button m-1" v-on:click="copyToClipboard">Copy</button>
-        <button class="button m-1" v-on:click="saveStory" v-bind:disabled="!validCount">Submit</button>
+        <button
+          class="button m-1"
+          v-on:click="saveStory"
+          v-bind:disabled="!validCount"
+        >
+          Submit
+        </button>
       </div>
     </div>
-    <footer class="footer">
-      <div class="content has-text-centered">
-        <p>Try coming up with a story with these five emojis!</p>
-        <p>Don't like them? Generate a new set.</p>
-        <p>
-          Use the copy button to copy the emoji list and your story, or use
-          submit to save your story for others to view.
-        </p>
-      </div>
-      <submissions v-bind:prompt="this.items.join('')" />
-    </footer>
+    <submissions
+      v-bind:topSubmissions="this.topSubmissions"
+      v-bind:promptSubmissions="this.promptSubmissions"
+    />
   </div>
 </template>
 
@@ -54,19 +63,35 @@ export default {
   data: function () {
     return {
       items: todaysPrompt(),
-      charCount: 0,
+      story: "",
       charLimit: 200,
-      validCount: false,
+      promptSubmissions: [],
+      topSubmissions: [],
     };
+  },
+  computed: {
+    charCount: function () {
+      return this.story.split("").length;
+    },
+    prompt: function () {
+      return this.items.join("");
+    },
+    validCount: function () {
+      return this.charCount <= this.charLimit && this.charCount > 0;
+    },
+  },
+  mounted: function () {
+    this.fetchRecentSubmissions();
+    this.fetchPromptSubmissions();
   },
   methods: {
     generate: function () {
+      this.story = "";
       this.items = randomSet();
     },
     copyToClipboard: function () {
-      let prompt = this.items.join("");
       let story = document.getElementById("story-box").value;
-      navigator.clipboard.writeText(`PROMPT: ${prompt}\n${story}`);
+      navigator.clipboard.writeText(`PROMPT: ${this.prompt}\n${story}`);
       this.$buefy.notification.open({
         message: "Copied to clipboard",
         type: "is-success",
@@ -74,13 +99,25 @@ export default {
         position: "is-top",
       });
     },
+    fetchPromptSubmissions() {
+      axios
+        .get("/.netlify/functions/fetch_prompt_submissions", {
+          params: { prompt: this.prompt },
+        })
+        .then((res) => {
+          this.promptSubmissions = res.data.submissions;
+        });
+    },
+    fetchRecentSubmissions() {
+      axios.get("/.netlify/functions/fetch_recent_submissions").then((res) => {
+        this.topSubmissions = res.data.submissions;
+      });
+    },
     saveStory: function () {
-      let prompt = this.items.join("");
-      let story = document.getElementById("story-box").value;
       axios
         .post("/.netlify/functions/submit_story", {
-          prompt: prompt,
-          story: story,
+          prompt: this.prompt,
+          story: this.story,
         })
         .then(() => {
           this.$buefy.notification.open({
@@ -88,6 +125,8 @@ export default {
             type: "is-success",
             position: "is-top",
           });
+          this.fetchRecentSubmissions();
+          this.fetchPromptSubmissions();
         })
         .catch((err) => {
           let response = err.response;
@@ -103,12 +142,6 @@ export default {
           });
         });
     },
-    updateCharCount: function () {
-      let box = document.getElementById("story-box");
-      let charCount = box.value.split("").length;
-      this.validCount = charCount <= this.charLimit && charCount > 0;
-      this.charCount = charCount;
-    },
   },
 };
 </script>
@@ -120,6 +153,8 @@ export default {
 // set global colors before importing other styles so they're not overridden
 $primary: $green;
 $link-focus-border: $primary;
+$tabs-toggle-link-active-background-color: $primary;
+$tabs-toggle-link-active-border-color: $primary;
 
 // Import Bulma and Buefy styles
 @import "~bulma";

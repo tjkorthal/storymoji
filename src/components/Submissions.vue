@@ -1,35 +1,53 @@
 <template>
   <div class="tile is-child is-justify-content-center">
-    <h2 class="title has-text-centered">User submissions</h2>
-    <div class="box" v-for="submission in submissions" :key="submission.id">
-      {{ submission.story }}
-    </div>
-    <div v-show="submissions.length == 0" class="box has-text-centered">
-      No one has submitted a story for this prompt. Be the first!
-    </div>
+    <br />
+    <b-tabs
+      position="is-centered"
+      type="is-toggle"
+      size="is-medium"
+      v-model="activeTab"
+    >
+      <b-tab-item label="Top stories">
+        <story-card
+          v-for="submission in topSubmissions"
+          :key="submission.id"
+          :prompt="submission.prompt"
+          :story="submission.story"
+        />
+      </b-tab-item>
+      <b-tab-item label="This prompt">
+        <story-card
+          v-for="submission in promptSubmissions"
+          :key="submission.id"
+          :prompt="submission.prompt"
+          :story="submission.story"
+        />
+        <div
+          v-show="promptSubmissions.length == 0"
+          class="box has-text-centered"
+        >
+          No one has submitted a story for this prompt. Be the first!
+        </div>
+      </b-tab-item>
+    </b-tabs>
   </div>
 </template>
 
 <script>
-import axios from "axios";
+import StoryCard from "./StoryCard.vue";
 
 export default {
+  components: {
+    StoryCard,
+  },
   props: {
-    prompt: String,
+    promptSubmissions: Array,
+    topSubmissions: Array,
   },
   data: function () {
     return {
-      submissions: [],
+      activeTab: 0,
     };
-  },
-  mounted: function () {
-    axios
-      .get("/.netlify/functions/fetch_submissions", {
-        params: { prompt: this.prompt },
-      })
-      .then((res) => {
-        this.submissions = res.data.submissions;
-      });
   },
 };
 </script>
